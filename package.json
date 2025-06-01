@@ -1,0 +1,12 @@
+{
+ "name": "frontend",
+ "version": "1.0.0",
+ "private": true,
+  "dependencies": {
+    "react-native-snap-carousel": "^3.9.1"
+  },
+ "scripts": {
+   "start": "react-native start",
+   "test": "jest"
+ }
+}
