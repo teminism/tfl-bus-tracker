@@ -1,5 +1,6 @@
 import axios from 'axios';
 import tfl from '../config/tfl';
+import 'dotenv/config';
 
 // This function retrieves the list of all nearby bus stops
 export const getNearbyStops = async (lat: number, lon: number) => {
@@ -64,8 +65,39 @@ export const getStopDestinations = async (stopId: string): Promise<{ lineId: str
 
 // This function retrieves the next bus arrivals for a specific stop
 export const getBusArrivals = async (stopId: string): Promise<any[]> => {
-  const url = `https://api.tfl.gov.uk/StopPoint/${stopId}/Arrivals?app_id=&app_key=${process.env.TFL_API_KEY}`;
+  // This will include credentials from config/tfl.ts
+  const response = await tfl.get(`/StopPoint/${stopId}/Arrivals`);
+  return response.data
+    .sort((a: any, b: any) => a.timeToStation - b.timeToStation)
+    .map((arrival: any) => ({
+      ...arrival,
+      minutesToArrival: Math.floor(arrival.timeToStation / 60),
+    }));
+};
 
-  const response = await axios.get(url);
-  return response.data.sort((a: { timeToStation: number; }, b: { timeToStation: number; }) => a.timeToStation - b.timeToStation);
+// This fuction retrieves the train station list and full details for each station
+export const getTrainStations  = async (lat: number, lon: number, radius = 500)=> {
+  const response = await tfl.get('/StopPoint', {
+    params: {
+      lat,
+      lon,
+      stopTypes: 'NaptanRailStation,NaptanMetroStation',
+      radius,
+      includeLineGroups: true,  
+      useStopPointHierarchy: true 
+    }
+  });
+
+  const stopPoints = response.data.stopPoints || [];
+
+  return stopPoints.map((station: any) => ({
+    naptanId: station.naptanId,
+    name: station.commonName,
+    lat: station.lat,
+    lon: station.lon,
+    distance: station.distance,
+    modes: station.modes || [],
+    lines: station.lines?.map((line: any) => line.name) || [],
+  }))
+  .sort((a: any, b: any) => a.distance - b.distance);
 };

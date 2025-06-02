@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getNearbyStops, getBusArrivals, getStopLines, getStopDestinations } from '../services/tflService';
+import { getNearbyStops, getBusArrivals, getStopLines, getStopDestinations, getTrainStations } from '../services/tflService';
 import { logError, logInfo } from '../utils/logger';
 
 // This controller handles requests related to bus stops, including fetching nearby stops, stop routes, and bus arrivals.
@@ -76,3 +76,19 @@ export const getBusArrivalsForStop = async (req: Request, res: Response): Promis
   }
 };
 
+export const getTrainStationsController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { lat, lon, radius } = req.query;
+
+    if (!lat || !lon) {
+      res.status(400).json({ error: 'Missing lat or lon' });
+      return;
+    }
+
+    const stations = await getTrainStations(Number(lat), Number(lon), radius ? Number(radius) : 500);
+    res.json({ stations });
+  } catch (error) {
+    logError('Error fetching train stations', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
