@@ -12,5 +12,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/stops', stopRoutes);
+app.use('/api', stopRoutes); 
 
 export default app;

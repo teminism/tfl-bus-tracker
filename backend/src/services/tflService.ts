@@ -76,28 +76,63 @@ export const getBusArrivals = async (stopId: string): Promise<any[]> => {
 };
 
 // This fuction retrieves the train station list and full details for each station
-export const getTrainStations  = async (lat: number, lon: number, radius = 500)=> {
-  const response = await tfl.get('/StopPoint', {
-    params: {
-      lat,
-      lon,
-      stopTypes: 'NaptanRailStation,NaptanMetroStation',
-      radius,
-      includeLineGroups: true,  
-      useStopPointHierarchy: true 
+export const getTrainStations = async (lat: number, lon: number) => {
+  try {
+    // Validate inputs
+    if (isNaN(lat) || isNaN(lon)) {
+      throw new Error(`Invalid coordinates: lat=${lat}, lon=${lon}`);
     }
-  });
 
-  const stopPoints = response.data.stopPoints || [];
+    // Try different station type combinations
+    const attempts = [
+      'NaptanRailStation',
+      'NaptanMetroStation',         
+    ];
 
-  return stopPoints.map((station: any) => ({
-    naptanId: station.naptanId,
-    name: station.commonName,
-    lat: station.lat,
-    lon: station.lon,
-    distance: station.distance,
-    modes: station.modes || [],
-    lines: station.lines?.map((line: any) => line.name) || [],
-  }))
-  .sort((a: any, b: any) => a.distance - b.distance);
+    const allStations: Record<string, any> = {}; 
+
+    for (const stopTypes of attempts) {
+      try {
+        const response = await tfl.get('/StopPoint', {
+          params: {
+            lat,
+            lon,
+            stopTypes,
+            radius: 1000,
+          },
+          timeout: 5000
+        });
+
+        console.log('Response:', response.data);
+
+
+        const stopPoints = Array.isArray(response.data.stopPoints) ? response.data.stopPoints : [];
+
+        for (const station of stopPoints) {
+          allStations[station.id] = {
+            id: station.id,
+            name: station.commonName,
+            distance: station.distance,
+            modes: (station.modes || []).filter((mode: string) => mode !== 'bus'),
+            lines: (station.lines || [])
+              .map((line: any) => line.name)
+              .filter((name: string) => isNaN(Number(name))),
+          };
+        }
+      } catch (error: any) {
+        console.warn(`Attempt failed with ${stopTypes}:`, error.message);
+        // Continue to next attempt
+      }
+    }
+
+    return Object.values(allStations).sort((a: any, b: any) => a.distance - b.distance);
+
+  } catch (error: any) {
+    console.error('Final TfL API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      params: error.config?.params
+    });
+    return [];
+  }
 };

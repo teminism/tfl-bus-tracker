@@ -78,17 +78,26 @@ export const getBusArrivalsForStop = async (req: Request, res: Response): Promis
 
 export const getTrainStationsController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { lat, lon, radius } = req.query;
+    const { lat, lon } = req.query;
 
     if (!lat || !lon) {
       res.status(400).json({ error: 'Missing lat or lon' });
       return;
     }
 
-    const stations = await getTrainStations(Number(lat), Number(lon), radius ? Number(radius) : 500);
-    res.json({ stations });
-  } catch (error) {
+    logInfo(`Fetching stations near lat=${lat}, lon=${lon}`);
+    const stations = await getTrainStations(Number(lat), Number(lon));
+    
+    res.json({ 
+      stations,
+      message: stations.length ? 'Stations found' : 'No stations found in radius'
+    });
+    
+  } catch (error: any) {
     logError('Error fetching train stations', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: 'Failed to fetch stations',
+      details: error.message 
+    });
   }
 };
