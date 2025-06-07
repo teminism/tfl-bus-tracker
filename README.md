@@ -1,37 +1,37 @@
-# TfL Bus Tracker 🚍
+# TfL Bus Tracker 
 
 A modern React Native application that helps users track London buses and trains in real-time using the Transport for London (TfL) API.
 
-## Architecture 🏗️
+## Architecture 
 
 The application follows a clean, modular architecture:
 
-## Features 🌟
+## Features 
 
-- **Real-time Location** 📍
+- **Real-time Location** 
   - Automatically detects user's current location
   - Shows nearby bus stops and train stations
   - Displays distance to each stop/station
 
-- **Bus Stops** 🚏
+- **Bus Stops** 
   - Lists all nearby bus stops with their details
   - Shows bus stop letters and indicators
   - Displays which bus lines serve each stop
   - Shows the direction ("towards") for each stop
 
-- **Train Stations** 🚉
+- **Train Stations** 
   - Shows nearby train and metro stations
   - Displays available transport modes
   - Lists all lines serving each station
   - Shows walking distance to stations
 
-- **Real-time Arrivals** ⏱️
+- **Real-time Arrivals** 
   - Live bus arrival predictions
   - Shows destination for each arriving bus
   - Displays minutes until arrival
   - Auto-refreshes every 15 seconds
 
-## Detailed Setup Instructions 📋
+## Detailed Setup Instructions 
 
 ### Prerequisites
 
@@ -120,7 +120,7 @@ npm run ios
 npm run android
 ```
 
-## API Documentation 📚
+## API Documentation 
 
 ### Bus Stops Endpoints
 
@@ -294,7 +294,7 @@ git commit -m "feat: your feature description"
 git push origin feature/your-feature
 ```
 
-## Testing 🧪
+## Testing 
 
 ### Backend Tests
 
